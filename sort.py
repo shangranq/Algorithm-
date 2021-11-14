@@ -25,3 +25,25 @@ def heapsort(A):
 
 quicksort(A, 0, len(A)-1)
 print(A)
+
+
+# radix sort
+def radixSort(nums):
+    PERBIT = 8
+    MASK = (1 << 8) - 1
+    for d in range(5):
+        shift = d * PERBIT
+        count = [0 for _ in range(MASK+1)]
+        for n in nums:
+            idx = (n >> shift) & MASK
+            count[idx] += 1
+        for i in range(1, len(count)):
+            count[i] += count[i-1]
+        auxi = [0 for _ in range(len(nums))]
+        for i in range(len(nums)-1, -1, -1):
+            idx = (nums[i] >> shift) & MASK
+            auxi[count[idx]-1] = nums[i]
+            count[idx] -= 1
+        nums = auxi
+    return nums
+
