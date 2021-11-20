@@ -1,111 +1,105 @@
-# Generic tree node class
-class TreeNode(object):
-    def __init__(self, val):
-        self.val = val
+class Node:
+    def __init__(self, key):
         self.left = None
         self.right = None
-        self.height = 1
+        self.val = key
+        self.count = 1 # count is used for augment the non-unique elements
+        self.height = 1 # height is for maintaining the balanced property of AVL tree
         
-class AVLTree(object):
- 
-    def insert(self, root, key):
-     
-        # Step 1 - Perform normal BST
-        if not root:
-            return TreeNode(key)
-        elif key < root.val:
-            root.left = self.insert(root.left, key)
-        else:
-            root.right = self.insert(root.right, key)
- 
-        # Step 2 - Update the height of the
-        # ancestor node
-        root.height = 1 + max(self.getHeight(root.left), self.getHeight(root.right))
- 
-        # Step 3 - Get the balance factor
-        balance = self.getBalance(root)
- 
-        # Step 4 - If the node is unbalanced,
-        # then try out the 4 cases
-        # Case 1 - Left Left
-        if balance > 1 and key < root.left.val:
-            return self.rightRotate(root)
- 
-        # Case 2 - Right Right
-        if balance < -1 and key > root.right.val:
-            return self.leftRotate(root)
- 
-        # Case 3 - Left Right
-        if balance > 1 and key > root.left.val:
-            root.left = self.leftRotate(root.left)
-            return self.rightRotate(root)
- 
-        # Case 4 - Right Left
-        if balance < -1 and key < root.right.val:
-            root.right = self.rightRotate(root.right)
-            return self.leftRotate(root)
- 
-        return root
+class AVLTree:
+    def __init__(self):
+        self.root = None
+        
+    def insert(self, key):
+        
+        def _insert(root, key):
+            if root is None:
+                return Node(key)
+            else:
+                if root.val == key:
+                    root.count += 1
+                    return root
+                elif root.val < key:
+                    root.right = _insert(root.right, key)
+                else:
+                    root.left = _insert(root.left, key)
+                
+                root.height = self.updateHeight(root)
+                balance = self.getBalance(root)
 
-    def delete(self, root, key):
- 
-        # Step 1 - Perform standard BST delete
-        if not root:
+                if balance > 1 and self.getBalance(root.left) > 0:
+                    return self.rightRotate(root)
+
+                if balance < -1 and self.getBalance(root.right) < 0:
+                    return self.leftRotate(root)
+
+                if balance > 1 and self.getBalance(root.left) < 0:
+                    root.left = self.leftRotate(root.left)
+                    return self.rightRotate(root)
+
+                if balance < -1 and self.getBalance(root.right) > 0:
+                    root.right = self.rightRotate(root.right)
+                    return self.leftRotate(root)
+                
             return root
- 
-        elif key < root.val:
-            root.left = self.delete(root.left, key)
- 
-        elif key > root.val:
-            root.right = self.delete(root.right, key)
- 
-        else:
-            if root.left is None:
-                temp = root.right
-                root = None
-                return temp
- 
-            elif root.right is None:
-                temp = root.left
-                root = None
-                return temp
         
-            temp = self.getMinValueNode(root.right)
-            root.val = temp.val
-            root.right = self.delete(root.right, temp.val)
+        self.root = _insert(self.root, key)
         
-        if root == None:
+    def delete(self, key):
+        
+        def _delete(root, key):
+            if root is None:
+                return root
+            if key < root.val:
+                root.left = _delete(root.left, key)
+            elif key > root.val:
+                root.right = _delete(root.right, key)
+            else:
+                root.count -= 1
+                if root.count > 0:
+                    return root
+                if root.left is None:
+                    return root.right
+                elif root.right is None:
+                    return root.left
+                else:
+                    nxt = root.right
+                    while nxt and nxt.left:
+                        nxt = nxt.left
+                    root.val = nxt.val
+                    root.count = nxt.count
+                    nxt.count = 0
+                    root.right = _delete(root.right, nxt.val)
+                    
+                root.height = self.updateHeight(root)
+                balance = self.getBalance(root)
+
+                if balance > 1 and self.getBalance(root.left) > 0:
+                    return self.rightRotate(root)
+
+                if balance < -1 and self.getBalance(root.right) < 0:
+                    return self.leftRotate(root)
+
+                if balance > 1 and self.getBalance(root.left) < 0:
+                    root.left = self.leftRotate(root.left)
+                    return self.rightRotate(root)
+
+                if balance < -1 and self.getBalance(root.right) > 0:
+                    root.right = self.rightRotate(root.right)
+                    return self.leftRotate(root)
+                    
             return root
-          
-        # Step 2 - Update the height of the ancestor node
-        root.height = 1 + max(self.getHeight(root.left), self.getHeight(root.right))
- 
-        # Step 3 - Get the balance factor
-        balance = self.getBalance(root)
- 
-        # Step 4 - If the node is unbalanced,
-        # then try out the 4 cases
-        # Case 1 - Left Left
-        if balance > 1 and self.getBalance(root.left) >= 0:
-            return self.rightRotate(root)
- 
-        # Case 2 - Right Right
-        if balance < -1 and self.getBalance(root.right) <= 0:
-            return self.leftRotate(root)
- 
-        # Case 3 - Left Right
-        if balance > 1 and self.getBalance(root.left) < 0:
-            root.left = self.leftRotate(root.left)
-            return self.rightRotate(root)
- 
-        # Case 4 - Right Left
-        if balance < -1 and self.getBalance(root.right) > 0:
-            root.right = self.rightRotate(root.right)
-            return self.leftRotate(root)
- 
-        return root
-            
- 
+        
+        self.root = _delete(self.root, key)
+        
+    def findMax(self):
+        if self.root == None:
+            return 0
+        node = self.root
+        while node and node.right:
+            node = node.right
+        return node.val
+    
     def leftRotate(self, z):
  
         y = z.right
@@ -116,8 +110,8 @@ class AVLTree(object):
         z.right = T2
  
         # Update heights
-        z.height = 1 + max(self.getHeight(z.left), self.getHeight(z.right))
-        y.height = 1 + max(self.getHeight(y.left), self.getHeight(y.right))
+        z.height = self.updateHeight(z)
+        y.height = self.updateHeight(y)
  
         # Return the new root
         return y
@@ -132,11 +126,14 @@ class AVLTree(object):
         z.left = T3
  
         # Update heights
-        z.height = 1 + max(self.getHeight(z.left), self.getHeight(z.right))
-        y.height = 1 + max(self.getHeight(y.left), self.getHeight(y.right))
+        z.height = self.updateHeight(z)
+        y.height = self.updateHeight(y)
  
         # Return the new root
         return y
+    
+    def updateHeight(self, node):
+        return 1 + max(self.getHeight(node.left), self.getHeight(node.right))
  
     def getHeight(self, root):
         if not root:
@@ -147,9 +144,35 @@ class AVLTree(object):
         if not root:
             return 0
         return self.getHeight(root.left) - self.getHeight(root.right)
-      
-    def getMinValueNode(self, root):
-        while root and root.left:
-            root = root.left
-        return root
+    
+# example solution of the LC 218
+class Solution:
+    def getSkyline(self, buildings: List[List[int]]) -> List[List[int]]:
+        OPEN, END = 1, 0
+        ans = []
+        pool = []
+        xs = set()
+        for l, r, h in buildings:
+            pool.append([l, OPEN, h])
+            pool.append([r, END, h])
+            xs.add(l)
+            xs.add(r)
+        pool.sort()
+        xs = sorted(list(xs))
+        
+        bst = AVLTree()
+        p_idx = 0
+        for x in xs:
+            while p_idx < len(pool) and pool[p_idx][0] == x:
+                _, status, h = pool[p_idx]
+                if status == OPEN:
+                    bst.insert(h)
+                else:
+                    bst.delete(h)
+                p_idx += 1
+            max_height = bst.findMax()
+            if ans and ans[-1][1] == max_height:
+                continue
+            ans.append([x, max_height])
+        return ans
     
