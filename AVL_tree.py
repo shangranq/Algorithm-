@@ -25,21 +25,7 @@ class AVLTree:
                     root.left = _insert(root.left, key)
                 
                 root.height = self.updateHeight(root)
-                balance = self.getBalance(root)
-
-                if balance > 1 and self.getBalance(root.left) > 0:
-                    return self.rightRotate(root)
-
-                if balance < -1 and self.getBalance(root.right) < 0:
-                    return self.leftRotate(root)
-
-                if balance > 1 and self.getBalance(root.left) < 0:
-                    root.left = self.leftRotate(root.left)
-                    return self.rightRotate(root)
-
-                if balance < -1 and self.getBalance(root.right) > 0:
-                    root.right = self.rightRotate(root.right)
-                    return self.leftRotate(root)
+                root = self.rebalance(root)
                 
             return root
         
@@ -72,25 +58,30 @@ class AVLTree:
                     root.right = _delete(root.right, nxt.val)
                     
                 root.height = self.updateHeight(root)
-                balance = self.getBalance(root)
-
-                if balance > 1 and self.getBalance(root.left) > 0:
-                    return self.rightRotate(root)
-
-                if balance < -1 and self.getBalance(root.right) < 0:
-                    return self.leftRotate(root)
-
-                if balance > 1 and self.getBalance(root.left) < 0:
-                    root.left = self.leftRotate(root.left)
-                    return self.rightRotate(root)
-
-                if balance < -1 and self.getBalance(root.right) > 0:
-                    root.right = self.rightRotate(root.right)
-                    return self.leftRotate(root)
+                root = self.rebalance(root)
                     
             return root
         
         self.root = _delete(self.root, key)
+        
+    def rebalance(self, node):
+        balance = self.getBalance(node)
+
+        if balance > 1 and self.getBalance(node.left) > 0:
+            return self.rightRotate(node)
+
+        if balance < -1 and self.getBalance(node.right) < 0:
+            return self.leftRotate(node)
+
+        if balance > 1 and self.getBalance(node.left) < 0:
+            node.left = self.leftRotate(node.left)
+            return self.rightRotate(node)
+
+        if balance < -1 and self.getBalance(node.right) > 0:
+            node.right = self.rightRotate(node.right)
+            return self.leftRotate(node)
+
+        return node
         
     def findMax(self):
         if self.root == None:
