@@ -23,13 +23,13 @@ class SegTree:
             node.total = node.left.total + node.right.total
             return node
         
-        self.root = build(nums, 0, len(nums)-1)
+        self.root = _build(nums, 0, len(nums)-1)
 
     def update(self, i, val):
         
         def _update(node, i, val):
             if node.s == node.e:
-                node.total = val
+                node.total += val
                 return node
             mid = (node.s + node.e) // 2
             if mid >= i:
@@ -44,11 +44,11 @@ class SegTree:
     def range(self, l, r):
       
         def _range(node, l, r):
-             if l <= node.s and node.e <= r:
-                  return node.total
-             if l > node.e or r < node.s:
-                  return 0
-             return _range(node.left, l, r) + _range(node.right, l, r)
+            if l <= node.s and node.e <= r:
+                return node.total
+            if l > node.e or r < node.s:
+                return 0
+            return _range(node.left, l, r) + _range(node.right, l, r)
           
         return _range(self.root, l, r)
       
