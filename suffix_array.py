@@ -4,6 +4,8 @@
 # There are total O(logn) sorts need to be done
 # Reference: https://www.youtube.com/watch?v=_TUeAdu-U_k
 
+# if replace the comparison sort with radix/count sort, the time complexity goes down to O(logn)
+
 def buildSuffixArray(s):
     suffixes = [[0, 0, 0] for _ in range(len(s))] # [rank0, rank1, index]
     for i in range(len(s)):
@@ -42,7 +44,7 @@ if __name__ == "__main__":
 # Time complexity recurence relationship: T(n) = T(2/3n) + O(n) => T(n) = O(n)
 # Reference: https://www.youtube.com/watch?v=x6j44AtzFmU
 # Reference: Simple Linear Work Suffix Array Construction, Juha Karkkainen and Peter Sanders
-
+# Reference: https://gist.github.com/markormesher/59b990fba09972b4737e7ed66912e044
 
 
     
